@@ -1,4 +1,4 @@
-a# Pacotes -----------------------------------------------------------------
+# Pacotes -----------------------------------------------------------------
 
 library(tidyverse)
 
@@ -210,89 +210,31 @@ imdb %>% mutate(duracao_horas = duracao/60)
 # install.packages("gender")
 library(gender)
 
-gender(c("William"), years = 2012)
-gender(c("Robin"), years = 2012)
+gender("daniel", method = "kantrowitz")
+gender("william", method = "kantrowitz")
+gender("nina", method = "kantrowitz")
 
-gender(c("Madison", "Hillary"), years = 1930, method = "ssa")
-gender(c("Madison", "Hillary"), years = 2010, method = "ssa")
-
-gender("Matheus", years = 1920)
-
-obter_genero <- function(nome, ano) {
-  
-  if (is.na(nome) | is.na(ano)) {
-    return(NA_character_)
-  }
-  
-  ano_min <- ano - 60
-  ano_max <- ano - 30
-  
-  if (ano_min < 1880) {
-    ano_min <- 1880
-  }
-  
-  genero <- gender(nome, years = c(ano_min, ano_max), method = "ssa")$gender
-  
-  if(length(genero) == 0) {
-    genero <- NA_character_
-  }
-  
-  genero
+obter_genero <- function(nome) {
+  gender(nome, method = "kantrowitz")$gender
 }
 
-obter_genero("Madison", 1930)
-obter_genero("Matheus", 1930)
+obter_genero("william")
 
-# demora +- 10 min.
-imdb_generos <- imdb %>%
-  select(diretor, ano) %>%
-  distinct() %>%
+imdb <- imdb %>% 
   mutate(
-    diretor_primeiro_nome = str_extract(diretor, ".* ") %>% str_trim(),
-    genero = map2_chr(diretor_primeiro_nome, ano, obter_genero)
+    diretor_primeiro_nome = str_extract(diretor, ".* ") %>% str_trim()
   )
 
-# saveRDS(imdb_generos, "data/imdb_generos.rds")
+imdb_generos <- imdb %>%
+  distinct(diretor_primeiro_nome) %>%
+  mutate(
+    genero = obter_genero(diretor_primeiro_nome)
+  )
+
+# saveRDS(imdb_generos, "dados/imdb_generos.rds")
 imdb_generos <- read_rds("dados/imdb_generos.rds")
 
 # https://github.com/meirelesff/genderBR
-
-# summarise ---------------------------------------------------------------
-
-# exemplo 1
-
-imdb %>% summarise(media_orcamento = mean(orcamento, na.rm=TRUE))
-
-# exemplo 2
-
-imdb %>% summarise(
-  media_orcamento = mean(orcamento, na.rm=TRUE),
-  mediana_orcamento = median(orcamento, na.rm = TRUE)
-)
-
-# exemplo 3
-
-imdb %>% summarise(
-  media_orcamento = mean(orcamento, na.rm=TRUE),
-  mediana_orcamento = median(orcamento, na.rm = TRUE),
-  qtd = n(),
-  qtd_diretores = n_distinct(diretor)
-)
-
-# exemplo 4
-
-imdb_generos %>%
-  summarise(n_diretora = sum(genero == "female", na.rm = TRUE))
-
-# exercício 1
-# Use o `summarise` para calcular a proporção de filmes com diretoras.
-
-# exercício 2
-# Calcule a duração média e mediana dos filmes da base.
-
-# exercício 3
-# Calcule o lucro médio dos filmes com duracao < 60 minutos. E o lucro médio dos filmes com
-# mais de 2 horas.
 
 # group_by + summarise ----------------------------------------------------
 
@@ -341,7 +283,7 @@ imdb %>%
 # exemplo 1
 
 imdb_generos2 <- imdb %>%
-  left_join(imdb_generos, by = c("titulo", "diretor", "ano"))
+  left_join(imdb_generos, by = "diretor_primeiro_nome")
 
 # exemplo 2
 
@@ -352,14 +294,10 @@ depara_cores <- tibble(
 
 imdb_cor <- left_join(imdb, depara_cores, by = c("cor"))
 
-# exemplo 3
-
-imdb_generos3 <- imdb %>%
-  left_join(imdb_generos, by = c("diretor", "ano"))
-
 # exercicio 1
 # Calcule a média dos orçamentos e receitas para filmes feitos por
 # genero do diretor.
+
 
 # gather ------------------------------------------------------------------
 
@@ -371,5 +309,9 @@ imdb_gather <- gather(imdb, "importancia_ator", "nome_ator", starts_with("ator")
 
 # exemplo 1
 
-imdb <- spread(imdb_gather, importancia_ator, nome_ator)
+imdb_generos2 %>% 
+  group_by(genero, ano) %>% 
+  summarise(media_orcamento = mean(orcamento, na.rm = TRUE)) %>% 
+  spread(genero, media_orcamento) %>% 
+  filter(ano > 2000)
 
