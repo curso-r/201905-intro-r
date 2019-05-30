@@ -4,7 +4,7 @@ library(tidyverse)
 # Caminhos até o arquivo --------------------------------------------------
 
 # 1. Podem ser absolutos
-"/home/william/Documents/Curso-R/intro-programacao-em-r-mestre/dados/imdb.csv"
+"~/Documents/201905-intro-r/dados/imdb.csv"
 
 # 2. Podem ser relativos ao diretório de trabalho
 getwd()

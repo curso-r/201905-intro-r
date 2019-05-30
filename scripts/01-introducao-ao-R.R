@@ -10,6 +10,7 @@ E_algumasPoucas.Pessoas_RENUNCIAMconvenções
 # Criando objetos/variáveis -----------------------------------------------
 
 obj <- 1
+obj = 1
 obj
 
 # ATALHO para rodar o código: CTRL + ENTER
@@ -36,7 +37,7 @@ vetor <- c(4, 8, 15, 16, 23, 42)
 
 vetor[1]
 vetor[c(1, 3)]
-vetor[-5]
+vetor <- vetor[-5]
 vetor[-c(1, 3)]
 
 # Tipos -------------------------------------------------------------------
@@ -107,6 +108,10 @@ minha_soma2(1, 2)
 3 == 3
 3 != 1
 5 %in% c(2, 4, 5)
+
+"a" >= "b"
+"a" == "a"
+a == a
 
 # Valores especiais -------------------------------------------------------
 
@@ -203,11 +208,14 @@ recipiente(rep("farinha", 2), "água", "fermento", "leite", "óleo") %>%
 
 # ATALHO: CTRL + SHIFT + M
 
+1:10 %>% mean()
+mean(1:10)
+
 # Controles de fluxo ------------------------------------------------------
 
-x <- 0
+x <- c(-1, 0)
 
-if(x < 0) {
+if(any(x < 0)) {
   "negativo"
 } else if(x == 0) {
   "neutro"
@@ -220,13 +228,13 @@ if(x < 0) {
 
 x <- -10:30
 
-x_categorizado <- ifelse(x < 0, "negativo", "positivo")
+x_categorizado <- ifelse(x < 0, -x, x)
 
 
 # Operações vetoriais  -----------------------------------------------------
 
 a <- 1:3
-b <- 4:9
+b <- 4:10
 
 a + 1
 b * 2
@@ -237,10 +245,18 @@ a + b
 
 class(c(1, 2, 3))
 
-c(1, 2, 3, "a")
+class(c(1, 2, 3, "a"))
 c(TRUE, FALSE, "a")
+class(1)
 c(1L, 2L, "a")
 c(TRUE, FALSE, 1)
+
+x <- 1:10
+x
+x > 5
+sum(as.numeric(x>5))
+sum(x > 5)
+mean(x>5)
 
 # logico < inteiro < numerico < caracter
 

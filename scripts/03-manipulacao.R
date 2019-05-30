@@ -11,6 +11,7 @@ imdb <- read_rds("dados/imdb.rds")
 # exemplo 1
 imdb %>% filter(nota_imdb > 9)
 
+
 # exemplo 2
 filmes_bons <- imdb %>% filter(nota_imdb > 9)
 filmes_bons
@@ -33,46 +34,65 @@ near(1 / 49 * 49, 1)
 
 bons <- imdb %>% filter(nota_imdb > 9)
 
-
 # exercício 1
 # Criar uma variável chamada `filmes_baratos` com filmes com orçamento menor do 
 # que 1 milhão de dólares.
 
+filmes_baratos <- imdb %>% filter(orcamento < 10^6)
+filmes_baratos <- filter(imdb, orcamento < 10^6)
 
+imdb %>% 
+  filter(orcamento > 10^6)
 
 # exemplo 5
 # operadores lógicos
 
-imdb %>% filter(ano > 2010 & nota_imdb > 8.5)
-imdb %>% filter(orcamento < 100000 & receita > 1000000)
+imdb %>% filter(ano > 2010 & nota_imdb > 8.5) %>% View()
+imdb %>% filter(orcamento < 100000 & receita > 1000000) %>% View()
 
 imdb %>% filter(receita > orcamento)
-imdb %>% filter(receita > orcamento + 500000000)
-imdb %>% filter(receita > orcamento + 500000000 | nota_imdb > 9)
+imdb %>% filter(receita > orcamento + 500000000) %>% View()
+imdb %>% filter(receita > orcamento + 500000000 | nota_imdb > 9) %>% View()
 
 imdb %>% filter(ano > 2010)
-imdb %>% filter(!ano > 2010)
-imdb %>% filter(!receita > orcamento)
+imdb %>% filter(!(ano > 2010))
+imdb %>% filter(!(receita > orcamento))
 
 # exercício 2
 # Criar um objeto chamado bons_baratos com filmes que tiveram nota no imdb 
 # maior do que 8.5 e um orcamento menor do que 1 milhão de dólares.
 
+bons_baratos <- imdb %>% filter(nota_imdb > 8.5 & orcamento < 1e6)
+
 # exercício 3
 # Criar um objeto chamado curtos_legais com filmes de até 1h30 e nota no imdb
 # maior do que 8.5.
+
+curtos_legais <- imdb %>% filter(!(duracao > 90) & nota_imdb > 8.5)
 
 # exercício 4
 # Criar um objeto antigo_colorido com filmes de antes de 1940 que são 
 # coloridos. Crie também um objeto antigo_bw com filmes antigos que não são coloridos.
 
+imdb %>% count(cor)
+antigo_colorido <- imdb %>% filter(ano < 1940, cor == "Color")
+antigo_bw <- imdb %>% filter(ano < 1940 & !cor == "Color")
+
+
 # exercício 5
 # Criar um objeto ww com filmes do Wes Anderson ou do Woody Allen.
 
-# exemplo 6
+ww <- imdb %>% filter(diretor == "Wes Anderson" | diretor == "Woody Allen")
+
+# exemplo 6  
 # %in%
 
-pitts <- imdb %>% filter(ator_1 %in% c('Angelina Jolie Pitt', "Brad Pitt"))
+pitts <- imdb %>% filter(
+  ator_1 %in% c('Angelina Jolie Pitt', "Brad Pitt"),
+  ator_2 %in% c('Angelina Jolie Pitt', "Brad Pitt")
+  )
+
+angelina <- imdb %>% filter(str_detect(ator_1, "Angelina"))
 
 # exercicio 6
 # Refaça o exercício 5 usando o %in%.
