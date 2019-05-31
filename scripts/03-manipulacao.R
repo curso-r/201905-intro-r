@@ -87,15 +87,16 @@ ww <- imdb %>% filter(diretor == "Wes Anderson" | diretor == "Woody Allen")
 # exemplo 6  
 # %in%
 
-pitts <- imdb %>% filter(
-  ator_1 %in% c('Angelina Jolie Pitt', "Brad Pitt"),
-  ator_2 %in% c('Angelina Jolie Pitt', "Brad Pitt")
-  )
+nomes <- c('Angelina Jolie Pitt', "Brad Pitt")
+
+pitts <- imdb %>% filter(ator_1 %in% nomes)
 
 angelina <- imdb %>% filter(str_detect(ator_1, "Angelina"))
 
 # exercicio 6
 # Refaça o exercício 5 usando o %in%.
+
+ww <- imdb %>% filter(diretor %in% c("Wes Anderson" ,"Woody Allen"))
 
 # exemplo 7
 # Relembrando as operações com NA
@@ -110,6 +111,8 @@ NA / 2
 
 NA == NA
 
+NA^0
+
 # Seja x a idade de Maria. Não sabemos a idade de Maria:
 x <- NA
 
@@ -121,17 +124,30 @@ x == y
 #> [1] NA
 # Não sabemos.
 
-is.na(x)
+is.na(c(1, NA, 2))
 
-df <- tibble(x = c(1, NA, 3))
-filter(df, x > 1)
-filter(df, is.na(x) | x > 1)
+df <- tibble(
+  x= c(1, NA, 3), 
+  y = c("a", "b", "c")
+  )
 
-imdb %>% filter(is.na(orcamento))
+df
+
+df %>% filter(x > 1)
+df %>% filter(is.na(x) | x > 1)
+
+imdb %>% filter(is.na(orcamento)) %>% View()
+
 
 # exercício 7
 # Identifique os filmes que não possuem informação tanto de receita quanto de orcamento
 # e salve em um objeto com nome sem_info.
+
+is.na(c(0,NA,2, 1) & c(0,1,2, NA))
+
+imdb$orcamento & imdb$receita
+sem_info <- imdb %>% filter(is.na(orcamento) | is.na(receita))
+
 
 # exemplo 8
 # str_detect
@@ -141,6 +157,11 @@ imdb %>% filter(str_detect(generos, "Action"))
 # exercício 8
 # Salve em um objeto os filmes de Ação e Comédia com nota no imdb maior do que 8.
 
+imdb %>% 
+  filter(str_detect(generos, "Action"), str_detect(generos, "Comedy"), nota_imdb>8)
+
+acao <- imdb %>% 
+  filter(str_detect(generos, "Action.*Comedy"), nota_imdb > 8)
 
 # arrange -----------------------------------------------------------------
 
@@ -165,22 +186,37 @@ imdb %>% arrange(desc(ano), titulo)
 
 df <- tibble(x = c(NA, 2, 1), y = c(1, 2, 3))
 
-df %>% arrange(x)
+df %>% arrange(desc(x))
+as.numeric(!is.na(df$x))
 df %>% arrange(!is.na(x), x)
 
 # exemplo 5
 
-imdb %>% filter(ano == 2010) %>% arrange(desc(orcamento))
+imdb %>% 
+  filter(ano == 2010) %>% 
+  filter(nota_imdb > 5) %>% 
+  arrange(desc(orcamento))
 
 # exercício 2 
 # Ordene por ordem decrescente do orçamento os filmes de um diretor a sua escolha.
 # Salve o resultado em um objeto chamado diretor_ordenado
 
+imdb %>% 
+  filter(
+    diretor == "James Gunn"
+  ) %>% 
+  arrange(desc(orcamento))
+  
+glimpse(imdb)
+summary(imdb)
+skimr::skim(imdb)
+
 # select ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% select(titulo, ano, orcamento)
+imdb %>% select(TITULO = titulo, ano, orcamento)
+imdb %>% rename(TITULO = titulo)
 
 # exemplo 2 
 
@@ -190,39 +226,86 @@ imdb %>% select(starts_with("ator"))
 
 imdb %>% select(-starts_with("ator"), -titulo)
 
+imdb %>% select(1, 2)
+
+imdb %>% select(-1)
+
+imdb %>% 
+  janitor::clean_names()
+
 # exercício 1
 # Crie uma tabela com apenas as colunas titulo, diretor, e orcamento. Salve em um
 # objeto chamado imdb_simples.
+
+imdb_simples <- imdb %>% select(titulo, diretor, orcamento)
 
 # exercício 2
 # Remova as colunas ator_1, ator_2 e ator_3 de três formas diferentes. Salve em um
 # objeto chamado imdb_sem_ator.
 
+imdb %>% select(-num_range("ator_", 1:3))
+imdb %>% select(-ator_1, -ator_2, -ator_3)
+imdb %>% select(-starts_with("ator_"))
+imdb %>% select(-contains("ator"))
+imdb %>% select(-c(ator_1, ator_2, ator_3))
+imdb %>% select(-matches("ator_.*"))
+
 # exercício 3
 # Crie uma tabela apenas com filmes do Woody Allen e as colunas titulo e ano
 # ordenada por ano.
 
+imdb %>% 
+  filter(diretor == "Woody Allen") %>% 
+  select(titulo, ano) %>% 
+  arrange(ano)
 
 # mutate ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% mutate(duracao = duracao/60)
+imdb %>% mutate(duracao = duracao/mean(duracao))
 
 # exemplo 2
 
 imdb %>% mutate(duracao_horas = duracao/60)
 
+imdb %>% 
+  #mutate(flag_wa = ifelse(diretor == "Woody Allen", "sim", "nao")) %>% 
+  mutate(flag_wa = as.numeric(diretor == "Woody Allen"))
+
+imdb %>% 
+  mutate(orcamento = ifelse(is.na(orcamento), 0, as.numeric(orcamento)))
+
+
 # exercício 1
 # Crie uma variável chamada lucro. Salve em um objeto chamado imdb_lucro.
 
+imdb_lucro <- imdb %>% mutate(lucro = receita - orcamento)
+View(imdb_lucro)
+
 # exercicio 2
 # Modifique a variável lucro para ficar na escala de milhões de dólares.
+
+imdb_lucro <- imdb_lucro %>% mutate(lucro = lucro/10^6)
 
 # exercício 3
 # Filtre apenas os filmes com prejuízo maior do que 3 milhões de dólares. 
 # Deixe essa tabela ordenada com o maior prejuízo primeiro. Salve o resultado em 
 # um objeto chamado filmes_prejuizo.
+
+imdb %>% 
+  mutate(prejuizo = orcamento - receita) %>% 
+  filter(prejuizo > 3*10^6)
+
+imdb_lucro %>% 
+  filter(lucro < -3) %>%
+  arrange(lucro) %>% 
+  View()
+
+
+imdb_lucro %>% 
+  mutate(lucro = round(lucro, 2)) %>% View()
+
 
 # exemplo 3
 # gêneros
@@ -238,7 +321,7 @@ obter_genero <- function(nome) {
   gender(nome, method = "kantrowitz")$gender
 }
 
-obter_genero("william")
+obter_genero(c("william", "william"))
 
 imdb <- imdb %>% 
   mutate(
@@ -246,9 +329,8 @@ imdb <- imdb %>%
   )
 
 imdb_generos <- imdb %>%
-  distinct(diretor_primeiro_nome) %>%
   mutate(
-    genero = obter_genero(diretor_primeiro_nome)
+    genero =  gender(diretor_primeiro_nome, method = "kantrowitz")$gender
   )
 
 # saveRDS(imdb_generos, "dados/imdb_generos.rds")
