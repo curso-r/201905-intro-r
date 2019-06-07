@@ -3,16 +3,17 @@ title: "IMDB"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
-    theme: journal
-editor_options: 
-  chunk_output_type: console
+    theme: bootstrap
 ---
 
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
-imdb <- read_rds("../dados/imdb.rds")
+imdb <- read_rds("../dados/imdb.rds") %>% 
+  mutate(lucro = receita - orcamento)
+
+theme_set(theme_minimal())
 ```
 
 Visão geral
@@ -31,19 +32,34 @@ Row
 ### Filmes
 
 ```{r}
-
+imdb %>% 
+  distinct() %>% 
+  top_n(10, lucro) %>% 
+  mutate(titulo = fct_reorder(titulo, lucro, na.rm = TRUE)) %>% 
+  ggplot(aes(x = titulo, y = lucro)) +
+  geom_col() +
+  coord_flip()
 ```
 
 ### # Diretores
 
 ```{r}
+n_diretores <- imdb %>% 
+  distinct(diretor) %>% 
+  nrow()
 
+valueBox(value = n_diretores, icon = "fa-users")
 ```
 
 ### # Atores
 
 ```{r}
+n_atores <- imdb %>% 
+  gather(posicao, ator, ator_1, ator_2, ator_3) %>% 
+  distinct(ator) %>% 
+  nrow()
 
+valueBox(value = n_atores, icon = "fa-users", color = "success")
 ```
 
 Row
@@ -52,9 +68,11 @@ Row
 ### Relação entre nota e lucro
 
 ```{r}
-imdb <- imdb %>% mutate(lucro = receita - orcamento)
+p <- imdb %>% 
+  ggplot(aes(x = nota_imdb, y = lucro)) +
+  geom_point()
 
-
+plotly::ggplotly(p)
 ```
 
 > Parece que se a nota é inferiror a uns 7, ela não é muito relacionada ao lucro do filme.
@@ -63,10 +81,10 @@ Mas em geral filmes com notas bem altas lucram mais do que os outros.
 ### Relação entre o orçamento e lucro
 
 ```{r}
-
+imdb %>% 
+  ggplot(aes(x = orcamento, y = lucro)) +
+  geom_point()
 ```
-
----
 
 > Filmes com maior orçamento têm maior possibilidade de prejuizo. Essas duas variáveis não são fortemente correlacionadas.
 
@@ -125,6 +143,8 @@ Column {.tabset}
 ```{r fig.height=7}
 
 ```
+
+### Outra aba
 
 Atores {data-orientation=columns}
 ============================================
